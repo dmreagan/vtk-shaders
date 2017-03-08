@@ -18,6 +18,63 @@ cylinder.SetResolution(8)
 cylinderMapper = vtk.vtkOpenGLPolyDataMapper()
 cylinderMapper.SetInputConnection(cylinder.GetOutputPort())
 
+# # Modify the shader to color based on model normal
+# # To do this we have to modify the vertex shader
+# # to pass the normal in model coordinates
+# # through to the fragment shader. By default the normal
+# # is converted to View coordinates and then passed on.
+# # We keep that, but add a varying for the original normal.
+# # Then we modify the fragment shader to set the diffuse color
+# # based on that normal. First lets modify the vertex
+# # shader
+# cylinderMapper.AddShaderReplacement(
+#     vtk.vtkShader.Vertex,
+#     "//VTK::Normal::Dec", # replace the normal block
+#     True, # before the standard replacements
+#     "//VTK::Normal::Dec\n" # we still want the default
+#     "  varying vec3 myNormalMCVSOutput;\n", #but we add this
+#     False # only do it once
+# )
+# cylinderMapper.AddShaderReplacement(
+#     vtk.vtkShader.Vertex,
+#     "//VTK::Normal::Impl", # replace the normal block
+#     True, # before the standard replacements
+#     "//VTK::Normal::Impl\n" # we still want the default
+#     "  myNormalMCVSOutput = normalMC;\n", #but we add this
+#     False # only do it once
+# )
+# # now modify the fragment shader
+# cylinderMapper.AddShaderReplacement(
+#     vtk.vtkShader.Fragment,  # in the fragment shader
+#     "//VTK::Normal::Dec", # replace the normal block
+#     True, # before the standard replacements
+#     "//VTK::Normal::Dec\n" # we still want the default
+#     "  varying vec3 myNormalMCVSOutput;\n", #but we add this
+#     False # only do it once
+# )
+# cylinderMapper.AddShaderReplacement(
+#     vtk.vtkShader.Fragment,  # in the fragment shader
+#     "//VTK::Normal::Impl", # replace the normal block
+#     True, # before the standard replacements
+#     "//VTK::Normal::Impl\n" # we still want the default calc
+#     "  diffuseColor = abs(myNormalMCVSOutput);\n", #but we add this
+#     False # only do it once
+# )
+
+
+
+vert = """
+    varying vec3 n;
+    varying vec3 l;
+
+    void propFuncVS(void)
+    {
+        n = normalize(gl_Normal);
+        l = vec3(gl_ModelViewMatrix * vec4(n,0));
+        gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    }
+"""
+
 # Modify the shader to color based on model normal
 # To do this we have to modify the vertex shader
 # to pass the normal in model coordinates
@@ -32,7 +89,8 @@ cylinderMapper.AddShaderReplacement(
     "//VTK::Normal::Dec", # replace the normal block
     True, # before the standard replacements
     "//VTK::Normal::Dec\n" # we still want the default
-    "  varying vec3 myNormalMCVSOutput;\n", #but we add this
+    "  varying vec3 n;\n" #but we add this
+    "  varying vec3 l;\n",
     False # only do it once
 )
 cylinderMapper.AddShaderReplacement(
@@ -40,7 +98,9 @@ cylinderMapper.AddShaderReplacement(
     "//VTK::Normal::Impl", # replace the normal block
     True, # before the standard replacements
     "//VTK::Normal::Impl\n" # we still want the default
-    "  myNormalMCVSOutput = normalMC;\n", #but we add this
+    "  n = normalize(gl_Normal);\n" #but we add this
+    "  l = vec3(gl_ModelViewMatrix * vec4(n, 0));\n"
+    "  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex\n",
     False # only do it once
 )
 # now modify the fragment shader
@@ -60,6 +120,7 @@ cylinderMapper.AddShaderReplacement(
     "  diffuseColor = abs(myNormalMCVSOutput);\n", #but we add this
     False # only do it once
 )
+
  
 # The actor is a grouping mechanism: besides the geometry (mapper), it
 # also has a property, transformation matrix, and/or texture map.
