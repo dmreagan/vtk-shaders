@@ -67,48 +67,6 @@ cylinderMapper.AddShaderReplacement(
 
 
 
-# # METHOD #2
-# # Use our own hardcoded shader code. Generally this is a bad idea in a
-# # general purpose program as there are so many things VTK supports that
-# # hardcoded shaders will not handle depth peeling, picking, etc, but if you
-# # know what your data will be like it can be very useful. The mapper will set
-# # a bunch of uniforms regardless of if you are using them. But feel free to
-# # use them :-)
-# cylinderMapper.SetVertexShaderCode(
-# "//VTK::System::Dec\n"  # always start with this line
-# "attribute vec4 vertexMC;\n"
-# # use the default normal decl as the mapper
-# # will then provide the normalMatrix uniform
-# # which we use later on
-# "//VTK::Normal::Dec\n"
-# "uniform mat4 MCDCMatrix;\n"
-# "void main () {\n"
-# "  normalVCVSOutput = normalMatrix * normalMC;\n"
-# # do something weird with the vertex positions
-# # this will mess up your head if you keep
-# # rotating and looking at it, very trippy
-# "  vec4 tmpPos = MCDCMatrix * vertexMC;\n"
-# "  gl_Position = tmpPos*vec4(0.2+0.8*abs(tmpPos.x),0.2+0.8*abs(tmpPos.y),1.0,1.0);\n"
-# "}\n"
-# )
-
-# cylinderMapper.SetFragmentShaderCode(
-# "//VTK::System::Dec\n"  # always start with this line
-# "//VTK::Output::Dec\n"  # always have this line in your FS
-# "varying vec3 normalVCVSOutput;\n"
-# "uniform vec3 diffuseColorUniform;\n"
-# "void main () {\n"
-# "  float df = max(0.0, normalVCVSOutput.z);\n"
-# "  float sf = pow(df, 20.0);\n"
-# "  vec3 diffuse = df * diffuseColorUniform;\n"
-# "  vec3 specular = sf * vec3(0.4,0.4,0.4);\n"
-# "  gl_FragData[0] = vec4(0.3*abs(normalVCVSOutput) + 0.7*diffuse + specular, 1.0);\n"
-# "}\n"
-# )
-
-
-
-
  
 # The actor is a grouping mechanism: besides the geometry (mapper), it
 # also has a property, transformation matrix, and/or texture map.
