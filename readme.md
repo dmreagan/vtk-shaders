@@ -23,3 +23,8 @@ This example borrows from:
 * http://www.vtk.org/Wiki/VTK/Examples/Python/Cylinder
 * http://www.vtk.org/Wiki/Shader_In_VTK
 * https://gitlab.kitware.com/vtk/vtk/blob/v7.0.0.rc2/Rendering/OpenGL2/Testing/Cxx/TestUserShader.cxx
+
+See also:
+* https://gitlab.kitware.com/vtk/vtk/blob/master/Rendering/OpenGL2/vtkOpenGLPolyDataMapper.cxx
+* https://gitlab.kitware.com/vtk/vtk/tree/master/Rendering/OpenGL2/glsl
+* http://noeskasmit.com/shaders-vtk-cel-shaded-skull-example-100-lines-python-code/
